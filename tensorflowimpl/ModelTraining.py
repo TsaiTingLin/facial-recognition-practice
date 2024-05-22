@@ -83,7 +83,7 @@ def evaluate_model(model, x_test, y_test, y_test_oh):
     plt.show()
 
 # 訓練
-def train(model, epochs=1, batch_size=64):
+def train(model, epochs=30, batch_size=64):
     emotions = {0: 'Angry', 1: 'Disgust', 2: 'Fear',
                 3: 'Happy', 4: 'Sad', 5: 'Surprise', 6: 'Neutral'}
     # 資料切割(訓練、驗證、測試)

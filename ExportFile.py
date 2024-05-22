@@ -1,6 +1,6 @@
 import tensorflow as tf
-import MobilenetV2Implement
-from ModelTraining import train
+from tensorflowimpl import MobilenetV2Implement
+from tensorflowimpl.ModelTraining import train
 
 
 # 存檔案
@@ -22,7 +22,7 @@ def save_model(model, save_name="mymodel"):
 
 # 產生mobilenet_v2.tflite
 model_name = "mobilenet_v2"
-save_model(train(MobilenetV2Implement.build_model()),model_name)
+save_model(train(MobilenetV2Implement.build_model()), model_name)
 
 # tflite_support會有版本問題,可以用colab生成 model metadata
 # ImageClassifierWriter = image_classifier.MetadataWriter
