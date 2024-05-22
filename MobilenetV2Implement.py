@@ -1,17 +1,15 @@
-import pandas as pd
-import numpy as np
+
 import tensorflow as tf
-from IPython.display import display
-from ModelTraining import train
-from keras.regularizers import l2
 from keras.optimizers import Adam
-from tensorflow.keras.layers import Lambda
 from tensorflow.keras.layers import Activation
-from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dropout
 from tensorflow.keras.layers import Input, Conv2D, DepthwiseConv2D, BatchNormalization, ReLU, Add, GlobalAveragePooling2D, Dense
 
+# 确认是否使用 GPU
+print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+print("TensorFlow version:", tf.__version__)
+print("Available devices:")
 
 # 建立預訓練模型
 def build_model(num_classes=7, input_shape=(48, 48, 3)):
@@ -53,5 +51,5 @@ def build_model(num_classes=7, input_shape=(48, 48, 3)):
 
     return model
 
-train(build_model(),"MobilenetV2")
+# train(build_model(),"MobilenetV2")
 

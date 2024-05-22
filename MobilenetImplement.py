@@ -1,12 +1,5 @@
-import pandas as pd
-import numpy as np
-import tensorflow as tf
-from ModelTraining import train
-from tensorflow.keras.layers import Dense
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Conv2D, DepthwiseConv2D, BatchNormalization, ReLU, Add, GlobalAveragePooling2D, Dense
-
-import mlflow.tensorflow
 
 
 # 建立預訓練模型
@@ -50,4 +43,4 @@ def build_model(num_classes=7, input_shape=(48, 48, 1)):
 
     return model
 
-train(build_model(),"Mobilenet")
+# train(build_model(),"Mobilenet")

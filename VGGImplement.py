@@ -1,13 +1,10 @@
-import itertools
-from sklearn.metrics import confusion_matrix, classification_report
+
 from tensorflow.keras.applications import VGG16
 from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.utils import to_categorical
 import tensorflow as tf
 import pandas as pd
 import numpy as np
-import os
-import matplotlib.pyplot as plt
 import mlflow
 
 
