@@ -1,9 +1,12 @@
 import numpy as np
 import pandas as pd
-import torch
-from torch.utils.data import Dataset
 from PIL import Image
+from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
+import torch
+
+# 檢查MPS是否可用
+device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
 
 
 class FER2013Dataset(Dataset):
@@ -15,11 +18,11 @@ class FER2013Dataset(Dataset):
         return len(self.dataframe)
 
     def __getitem__(self, idx):
-        # 提取图像像素和标签
-        image = np.fromstring(self.dataframe.iloc[idx, 1], dtype=int, sep=' ')
-        image = image.reshape(48, 48).astype(np.uint8)
-        image = Image.fromarray(image)  # 将NumPy数组转换为PIL图像
-        image = image.convert('RGB')  # 将灰度图像转换为RGB图像
+        # 提取圖像像素和標籤
+        pixels = self.dataframe.iloc[idx, 1].split()  # 將像素字符串分割成單個像素值
+        image = np.array(pixels, dtype=np.uint8).reshape(48, 48)  # 將像素轉換為48x48的NumPy數組
+        image = Image.fromarray(image)  # 將NumPy數組轉換為PIL圖像
+        image = image.convert('RGB')  # 將灰度圖像轉換為RGB圖像（3通道）
 
         if self.transform:
             image = self.transform(image)
@@ -28,35 +31,46 @@ class FER2013Dataset(Dataset):
         return image, label
 
 
-# 定义情绪标签字典
+# 定義情緒標籤字典
 emotions = {0: 'Angry', 1: 'Disgust', 2: 'Fear', 3: 'Happy', 4: 'Sad', 5: 'Surprise', 6: 'Neutral'}
 
-# 定义数据转换
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),  # 调整图像大小以匹配MobileNetV2的输入大小
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # 使用3通道的均值和标准差进行归一化
-])
-
-# 读入数据集
+# 讀取數據集
 df_raw = pd.read_csv('../fer2013.csv')
 
-# 按Usage栏位划分数据
+# 按Usage字段劃分數據
 train_data = df_raw[df_raw['Usage'] == 'Training']
 val_data = df_raw[df_raw['Usage'] == 'PublicTest']
 test_data = df_raw[df_raw['Usage'] == 'PrivateTest']
 
-# 创建数据集对象
-train_dataset = FER2013Dataset(train_data, transform=transform)
+# 選擇每個情緒類別前1000個樣本來構建訓練集
+train_data_1000 = train_data[train_data.iloc[:, 0].isin(range(4))].groupby(train_data.columns[0]).head(1000)
+val_data = val_data[val_data.iloc[:, 0].isin(range(4))]
+test_data = test_data[test_data.iloc[:, 0].isin(range(4))]
+data_counts = val_data.groupby(val_data.columns[0]).size()
+class_counts = train_data_1000['emotion'].value_counts()
+print(class_counts)
+
+# 計算訓練集的平均值和標準差
+pixel_values = train_data_1000.iloc[:, 1].apply(lambda x: np.array(x.split(), dtype=np.uint8))
+pixel_array = np.stack(pixel_values.values)
+train_mean = np.mean(pixel_array) / 255.0
+train_std = np.std(pixel_array) / 255.0
+
+print(train_mean, train_std)
+
+# 定義數據轉換
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[train_mean] * 3, std=[train_std] * 3)  # 將均值和標準差擴展為3個通道
+])
+
+# 創建數據集對象
+train_dataset = FER2013Dataset(train_data_1000, transform=transform)
 val_dataset = FER2013Dataset(val_data, transform=transform)
 test_dataset = FER2013Dataset(test_data, transform=transform)
 
-# 创建数据加载器
-from torch.utils.data import DataLoader
-
-train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=128, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
-
-device = torch.device("mps") if torch.backends.mps.is_available() else torch.device("cpu")
-print(f"Using device: {device}")
+# 創建數據加載器
+train_loader = DataLoader(train_dataset, batch_size=256, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=256, shuffle=False)
+test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)

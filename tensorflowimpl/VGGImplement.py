@@ -53,7 +53,7 @@ def build_model(preModel=VGG16, num_classes=7):
 
 
 
-df_raw = pd.read_csv("fer2013.csv")
+df_raw = pd.read_csv("../fer2013.csv")
 # 資料切割(訓練、驗證、測試)
 df_train = df_raw[df_raw['Usage'] == 'Training']
 df_val = df_raw[df_raw['Usage'] == 'PublicTest']

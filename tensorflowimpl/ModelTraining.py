@@ -87,7 +87,7 @@ def train(model, epochs=30, batch_size=64):
     emotions = {0: 'Angry', 1: 'Disgust', 2: 'Fear',
                 3: 'Happy', 4: 'Sad', 5: 'Surprise', 6: 'Neutral'}
     # 資料切割(訓練、驗證、測試)
-    df_raw = pd.read_csv("fer2013.csv")
+    df_raw = pd.read_csv("../fer2013.csv")
     df_train = df_raw[df_raw['Usage'] == 'Training']
     df_val = df_raw[df_raw['Usage'] == 'PublicTest']
     df_test = df_raw[df_raw['Usage'] == 'PrivateTest'].head(20)
